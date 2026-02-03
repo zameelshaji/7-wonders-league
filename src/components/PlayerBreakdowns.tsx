@@ -1,6 +1,24 @@
 import { useState, useMemo } from 'react'
 import { PLAYERS, CATEGORIES } from '../lib/supabase'
 import type { Game, Player } from '../lib/supabase'
+import {
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+} from 'recharts'
+
+const PLAYER_COLORS: Record<string, string> = {
+  Zam: '#f59e0b',
+  Arps: '#3b82f6',
+  Re: '#10b981',
+  Aru: '#ef4444',
+  Molly: '#a855f7',
+}
 
 interface PlayerBreakdownsProps {
   games: Game[]
@@ -160,6 +178,30 @@ export default function PlayerBreakdowns({ games }: PlayerBreakdownsProps) {
 
   const currentPlayerStats = selectedPlayer !== 'all' ? playerStats[selectedPlayer] : null
 
+  const radarData = useMemo(() => {
+    return CATEGORIES.map(category => {
+      const dataPoint: Record<string, string | number> = { category }
+
+      if (selectedPlayer === 'all') {
+        playersWithGames.forEach(player => {
+          const stats = playerStats[player]
+          dataPoint[player] = stats.totalGames > 0
+            ? Number((stats.categoryTotals[category] / stats.totalGames).toFixed(1))
+            : 0
+        })
+      } else {
+        const stats = playerStats[selectedPlayer]
+        dataPoint[selectedPlayer] = stats.totalGames > 0
+          ? Number((stats.categoryTotals[category] / stats.totalGames).toFixed(1))
+          : 0
+      }
+
+      return dataPoint
+    })
+  }, [selectedPlayer, playerStats, playersWithGames])
+
+  const radarPlayers = selectedPlayer === 'all' ? playersWithGames : [selectedPlayer]
+
   return (
     <div className="space-y-6">
       {/* Filters */}
@@ -205,6 +247,51 @@ export default function PlayerBreakdowns({ games }: PlayerBreakdownsProps) {
               <option value="asc">Ascending</option>
             </select>
           </div>
+        </div>
+      </div>
+
+      {/* Radar Chart */}
+      <div className="bg-ancient-900/50 rounded-lg p-6 border border-gold-600/30">
+        <h3 className="text-xl font-bold text-gold-400 mb-4">
+          Category Averages {selectedPlayer !== 'all' ? `- ${selectedPlayer}` : '- All Players'}
+        </h3>
+        <div className="h-[400px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart data={radarData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+              <PolarGrid stroke="#5b4536" />
+              <PolarAngleAxis
+                dataKey="category"
+                tick={{ fill: '#d1bda3', fontSize: 12 }}
+              />
+              <PolarRadiusAxis
+                angle={90}
+                domain={[0, 'auto']}
+                tick={{ fill: '#a47a58', fontSize: 10 }}
+              />
+              {radarPlayers.map(player => (
+                <Radar
+                  key={player}
+                  name={player}
+                  dataKey={player}
+                  stroke={PLAYER_COLORS[player] || '#fbbf24'}
+                  fill={PLAYER_COLORS[player] || '#fbbf24'}
+                  fillOpacity={0.2}
+                  strokeWidth={2}
+                />
+              ))}
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#30231b',
+                  border: '1px solid #5b4536',
+                  borderRadius: '8px',
+                  color: '#f0ebe3',
+                }}
+              />
+              <Legend
+                wrapperStyle={{ color: '#d1bda3' }}
+              />
+            </RadarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
