@@ -5,8 +5,9 @@ import ScoreInput from './components/ScoreInput'
 import LeagueTable from './components/LeagueTable'
 import StatsDashboard from './components/StatsDashboard'
 import GameHistory from './components/GameHistory'
+import PlayerBreakdowns from './components/PlayerBreakdowns'
 
-type Tab = 'league' | 'newgame' | 'stats' | 'history'
+type Tab = 'league' | 'newgame' | 'stats' | 'players' | 'history'
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('league')
@@ -37,6 +38,7 @@ function App() {
     { id: 'league', label: 'League' },
     { id: 'newgame', label: 'New Game' },
     { id: 'stats', label: 'Stats' },
+    { id: 'players', label: 'Players' },
     { id: 'history', label: 'History' },
   ]
 
@@ -103,6 +105,7 @@ function App() {
               />
             )}
             {activeTab === 'stats' && <StatsDashboard games={games} />}
+            {activeTab === 'players' && <PlayerBreakdowns games={games} />}
             {activeTab === 'history' && (
               <GameHistory games={games} onGameDeleted={fetchGames} />
             )}
