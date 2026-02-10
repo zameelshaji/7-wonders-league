@@ -5,52 +5,5 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-export const PLAYERS = ['Zam', 'Arps', 'Re', 'Aru', 'Molly'] as const
-export type Player = typeof PLAYERS[number]
-
-export const CATEGORIES = [
-  'Wonders',
-  'Coins',
-  'Military',
-  'Blue',
-  'Gold',
-  'Green',
-  'Purple',
-  'Black',
-  'Armada',
-  'Islands',
-] as const
-export type Category = typeof CATEGORIES[number]
-
-export const BASE_CATEGORIES: Category[] = ['Wonders', 'Coins', 'Military', 'Blue', 'Gold', 'Green', 'Purple']
-export const EXPANSION_CATEGORIES: Category[] = ['Black', 'Armada', 'Islands']
-
-export interface PlayerScores {
-  Wonders: number
-  Coins: number
-  Military: number
-  Blue: number
-  Gold: number
-  Green: number
-  Purple: number
-  Black: number
-  Armada: number
-  Islands: number
-  Total: number
-}
-
-export interface GameScores {
-  [playerName: string]: PlayerScores
-}
-
-export interface Game {
-  id: number
-  date: string
-  players: string[]
-  scores: GameScores
-  created_at: string
-}
-
-export function calculateTotal(scores: Omit<PlayerScores, 'Total'>): number {
-  return Object.values(scores).reduce((sum, val) => sum + val, 0)
-}
+// Default user ID for V1 (single user, no auth)
+export const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000000'
