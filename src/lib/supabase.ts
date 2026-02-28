@@ -5,9 +5,6 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-export const PLAYERS = ['Zam', 'Arps', 'Re', 'Aru', 'Molly'] as const
-export type Player = typeof PLAYERS[number]
-
 export const CATEGORIES = [
   'Wonders',
   'Coins',
@@ -17,13 +14,21 @@ export const CATEGORIES = [
   'Green',
   'Purple',
   'Black',
-  'Armada',
-  'Islands',
+  'Leaders',
 ] as const
 export type Category = typeof CATEGORIES[number]
 
-export const BASE_CATEGORIES: Category[] = ['Wonders', 'Coins', 'Military', 'Blue', 'Gold', 'Green', 'Purple']
-export const EXPANSION_CATEGORIES: Category[] = ['Black', 'Armada', 'Islands']
+export const NUM_TEAMS = 5
+export const PLAYERS_PER_TEAM = 2
+export const TOTAL_ROUNDS = 5
+
+export interface Team {
+  id?: number
+  team_name: string
+  player1: string
+  player2: string
+  created_at?: string
+}
 
 export interface PlayerScores {
   Wonders: number
@@ -34,23 +39,45 @@ export interface PlayerScores {
   Green: number
   Purple: number
   Black: number
-  Armada: number
-  Islands: number
+  Leaders: number
   Total: number
 }
 
-export interface GameScores {
-  [playerName: string]: PlayerScores
+export interface RoundScores {
+  [teamName: string]: {
+    player1: { name: string; scores: PlayerScores }
+    player2: { name: string; scores: PlayerScores }
+    teamTotal: number
+  }
 }
 
-export interface Game {
-  id: number
-  date: string
-  players: string[]
-  scores: GameScores
-  created_at: string
+export interface Round {
+  id?: number
+  round_number: number
+  sitting_out_team: string
+  scores: RoundScores
+  created_at?: string
 }
 
 export function calculateTotal(scores: Omit<PlayerScores, 'Total'>): number {
   return Object.values(scores).reduce((sum, val) => sum + val, 0)
+}
+
+export function emptyScores(): Omit<PlayerScores, 'Total'> {
+  return {
+    Wonders: 0,
+    Coins: 0,
+    Military: 0,
+    Blue: 0,
+    Gold: 0,
+    Green: 0,
+    Purple: 0,
+    Black: 0,
+    Leaders: 0,
+  }
+}
+
+// Generate fair rotation: each team sits out exactly once across 5 rounds
+export function generateRotation(teams: Team[]): string[] {
+  return teams.map(t => t.team_name)
 }
